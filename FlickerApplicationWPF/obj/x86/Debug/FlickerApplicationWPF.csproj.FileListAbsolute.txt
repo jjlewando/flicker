@@ -1,0 +1,13 @@
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\bin\Debug\FlickerApplicationWPF.exe
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\bin\Debug\FlickerApplicationWPF.pdb
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\ResolveAssemblyReference.cache
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\MainWindow.baml
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\MainWindow.g.cs
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\App.g.cs
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\FlickerApplicationWPF_MarkupCompile.cache
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\FlickerApplicationWPF.g.resources
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\FlickerApplication.Properties.Resources.resources
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\GenerateResource.read.1.tlog
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\GenerateResource.write.1.tlog
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\FlickerApplicationWPF.exe
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\FlickerApplicationWPF.pdb
