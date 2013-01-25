@@ -11,3 +11,5 @@ G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\Ge
 G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\GenerateResource.write.1.tlog
 G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\FlickerApplicationWPF.exe
 G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\FlickerApplicationWPF.pdb
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\bin\Debug\FTD2XX_NET.dll
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\bin\Debug\FTD2XX_NET.xml
