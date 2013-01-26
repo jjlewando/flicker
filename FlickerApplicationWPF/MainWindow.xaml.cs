@@ -33,7 +33,7 @@ namespace FlickerApplication
             formSplash.Show();
             formSplash.Topmost = true; 
             dispTimer.Tick += new EventHandler(dispTimer_Tick);
-            dispTimer.Interval = new TimeSpan(0, 0, 3);
+            dispTimer.Interval = new TimeSpan(0, 0, 2);
             dispTimer.Start();
             
         }
@@ -149,9 +149,15 @@ namespace FlickerApplication
         {
             if (myFlicer.isOpened())
             {
-                byte dtCode = 0xA0;
+                List<byte> byteList = new List<byte>();
+
+                byteList.Add(0xA1);
+
                 DateTime time = DateTime.Now;
                 Console.WriteLine(time.ToString());
+                
+                
+                
                 myFlicer.writeData(time.ToString());
                 textStatus.Text += Environment.NewLine + time.ToString();
                 textStatus.ScrollToEnd();
