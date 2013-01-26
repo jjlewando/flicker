@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using FTD2XX_NET;
+using System.Threading;
+using System.ComponentModel;
+
 
 namespace FlickerApplication
 {
@@ -11,6 +15,7 @@ namespace FlickerApplication
         // Create new instance of the FTDI device class
         private static FTDI myFtdiDevice;
         private bool opened { get; set; }
+        public Queue receivedData = new Queue();
 
         public FTDevice()
         {
@@ -177,9 +182,50 @@ namespace FlickerApplication
         }
 
 
+        private AutoResetEvent receiverEvent;
+        private BackgroundWorker dataReceivedHandler;
 
+        public void FtReceiverInit()
+        {
+            FTDI.FT_STATUS status = FTDI.FT_STATUS.FT_OK;
+            receiverEvent = new AutoResetEvent(false);
+            status = myFtdiDevice.SetEventNotification(FTDI.FT_EVENTS.FT_EVENT_RXCHAR, receiverEvent);
+            dataReceivedHandler = new BackgroundWorker();
+            dataReceivedHandler.DoWork += new DoWorkEventHandler(dataReceivedHandler_DoWork);
+            if (!dataReceivedHandler.IsBusy)
+            {
+                dataReceivedHandler.RunWorkerAsync(); 
+            }
+        }
 
+        void dataReceivedHandler_DoWork(object sender, DoWorkEventArgs e)
+        {
+            UInt32 nrOfBytesAvailable = 0;
+            while (true)
+            {
+                // wait until event is fired
+                this.receiverEvent.WaitOne();
 
+                // try to recieve data now
+                FTDI.FT_STATUS status = myFtdiDevice.GetRxBytesAvailable(ref nrOfBytesAvailable);
+                if (status != FTDI.FT_STATUS.FT_OK)
+                {
+                    break;
+                }
+                if (nrOfBytesAvailable > 0)
+                {
+                    byte[] readData = new byte[nrOfBytesAvailable];
+                    UInt32 numBytesRead = 0;
+                    status = myFtdiDevice.Read(readData, nrOfBytesAvailable, ref numBytesRead);
 
+                    // invoke your own event handler for data received...
+                    //InvokeCharacterReceivedEvent(fParsedData);
+                    receivedData.Enqueue(readData);
+                    Console.WriteLine("Number of bytes = ");
+                    Console.WriteLine(nrOfBytesAvailable);
+                    Console.WriteLine(receivedData.Count);
+                }
+            }
+        }
     }
 }

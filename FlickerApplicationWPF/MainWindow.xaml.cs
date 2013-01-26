@@ -11,7 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using System.Windows.Threading;
+using System.Windows.Forms;
 
 namespace FlickerApplication
 {
@@ -21,15 +22,30 @@ namespace FlickerApplication
     public partial class MainWindow : Window
     {
         private static FTDevice myFlicer = new FTDevice();
+        private static FormSplash formSplash = new FormSplash();
+        public DispatcherTimer dispTimer = new DispatcherTimer();
         
-
 
         public MainWindow()
         {
             InitializeComponent();
-            enableControls(true, false, false, false);        
+            enableControls(true, false, false, false);
+            formSplash.Show();
+            formSplash.Topmost = true; 
+            dispTimer.Tick += new EventHandler(dispTimer_Tick);
+            dispTimer.Interval = new TimeSpan(0, 0, 3);
+            dispTimer.Start();
+            
         }
 
+        void dispTimer_Tick(object sender, EventArgs e)
+        {
+            formSplash.Close();
+            dispTimer.Stop();
+            //Console.WriteLine("Timer event");            
+            CommandManager.InvalidateRequerySuggested();
+        }
+        
         private void enableControls(bool keyConnect, bool keyReed, bool keyErase, bool keySynchro)
         {
             //btConnect.IsEnabled = keyConnect;
@@ -62,12 +78,13 @@ namespace FlickerApplication
                     {
                         textStatus.Text += Environment.NewLine + "Connected";
                         enableControls(false, true, true, true);
+                        myFlicer.FtReceiverInit();
+
                     }
                     else
                     {
                         textStatus.Text += Environment.NewLine + "Connection Error";
                     }
-
                 }
                 else
                 {
@@ -82,9 +99,39 @@ namespace FlickerApplication
         {
             if (myFlicer.isOpened())
             {
-                myFlicer.writeData("Hello");
-                textStatus.Text += Environment.NewLine + "R-Command Send";
-                textStatus.ScrollToEnd();
+                FolderBrowserDialog folderDialog = new FolderBrowserDialog();
+                folderDialog.Description = "Select folder for flicker measurements";
+                DialogResult result = folderDialog.ShowDialog();
+                //folderDialog.ShowDialog();
+
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    enableControls(false, false, false, false);
+                    Console.WriteLine("FolderOpened");
+                    DateTime dataCzas = DateTime.Now;
+
+                    //string flickerFolder = folderDialog.SelectedPath;
+                    string flickerFilePath = folderDialog.SelectedPath + "\\" + "Flicker_[" + dataCzas.Year.ToString() + "_" + dataCzas.Month.ToString() + "_" + dataCzas.Day.ToString() + "].txt";
+
+                    System.IO.StreamWriter flickerFile = new System.IO.StreamWriter(flickerFilePath);
+                    
+                    // Send Command to device
+                    myFlicer.writeData("R");
+                    textStatus.Text += Environment.NewLine + "R-Command Send";
+                    textStatus.ScrollToEnd();
+
+                    //lock application and wait for all data (?) <---------------
+                    
+                    
+                    //flickerFile.Write(Environment.NewLine + "kolejny tekst");
+                    
+                    flickerFile.Close(); 
+                }
+                else
+                {
+                    Console.WriteLine("Folder not selected");
+                }
+                enableControls(false, true, true, true);
             }
         }
 
@@ -92,7 +139,7 @@ namespace FlickerApplication
         {
             if (myFlicer.isOpened())
             {
-                myFlicer.writeData("Bye");
+                myFlicer.writeData("E");
                 textStatus.Text += Environment.NewLine + "E-Command Send";
                 textStatus.ScrollToEnd();
             }
