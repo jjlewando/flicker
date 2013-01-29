@@ -26,9 +26,13 @@ namespace FlickerApplication
         private static FTDevice myFlicer = new FTDevice();
         private static FormSplash formSplash = new FormSplash();
         public DispatcherTimer dispTimer = new DispatcherTimer();
-        public DispatcherTimer dataTimer = new DispatcherTimer();
+        //public DispatcherTimer dataTimer = new DispatcherTimer();
         private static WindowData windowData = new WindowData();
-
+        private Queue<byte> flickerMeasurements = new Queue<byte>();
+        public bool readerEnable = new bool();
+        public static System.IO.StreamWriter flickerFile;
+        private FileLogger logger;
+ 
         public MainWindow()
         {
             InitializeComponent();
@@ -36,10 +40,8 @@ namespace FlickerApplication
             formSplash.Show();
             formSplash.Topmost = true; 
             dispTimer.Tick += new EventHandler(dispTimer_Tick);
-            dispTimer.Interval = new TimeSpan(0, 0, 2);
-            dispTimer.Start();
-            
-            
+            dispTimer.Interval = new TimeSpan(0, 0, 1);
+            dispTimer.Start();            
         }
 
         void dispTimer_Tick(object sender, EventArgs e)
@@ -63,6 +65,9 @@ namespace FlickerApplication
 
         private void buttonConnect(object sender, RoutedEventArgs e)
         {
+            logger = new FileLogger();
+            logger.AddEntry("Aplication started");            
+
             if (myFlicer.isOpened())
             {
                 //Device is open
@@ -102,41 +107,32 @@ namespace FlickerApplication
         {
             if (myFlicer.isOpened())
             {
+                readerEnable = false;
                 FolderBrowserDialog folderDialog = new FolderBrowserDialog();
                 folderDialog.Description = "Select folder for flicker measurements";
                 DialogResult result = folderDialog.ShowDialog();
-                //folderDialog.ShowDialog();
+
 
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
-                    enableControls(false, false, false, false);
                     Console.WriteLine("FolderOpened");
                     DateTime dataCzas = DateTime.Now;
                     string flickerFilePath = folderDialog.SelectedPath + "\\" + "Flicker_[" + dataCzas.Year.ToString() + "_" + dataCzas.Month.ToString() + "_" + dataCzas.Day.ToString() + "].txt";
 
-                    System.IO.StreamWriter flickerFile = new System.IO.StreamWriter(flickerFilePath);
-                    
-                    // Send Command to device
-                    
+                    flickerFile = new System.IO.StreamWriter(flickerFilePath);
 
-                    //lock application and wait for all data (?) <---------------
-                                        
-                    //flickerFile.Write(Environment.NewLine + "kolejny tekst");
-                    windowData.Show();
-                    windowData.textBox1.Text = "Hello";
-
-                    //dataTimer.Tick += new EventHandler(dataTimer_Tick);
-                    //dataTimer.Interval = new TimeSpan(0, 0, 5);
-                    //dataTimer.Start();
+                    enableControls(false, false, false, false);
                     
+                    windowData.ShowDialog();
+                    windowData.textBox1.Text = "";
+                    myFlicer.receivedData.Clear();
                     StartReadingQueue();
-                                       
-
+                    
                     myFlicer.writeData("R");
                     textStatus.Text += Environment.NewLine + "R-Command Send";
                     textStatus.ScrollToEnd();
 
-                    flickerFile.Close(); 
+                    
                 }
                 else
                 {
@@ -147,12 +143,15 @@ namespace FlickerApplication
         }
 
         BackgroundWorker ftdiQueueReader = new BackgroundWorker();
+
         
+
 
         private void StartReadingQueue()
         {
+            readerEnable = true;
             ftdiQueueReader.WorkerSupportsCancellation = true;
-            
+
             ftdiQueueReader.DoWork += new DoWorkEventHandler(ftdiQueueReader_DoWork);
             if (ftdiQueueReader.IsBusy != true)
             {
@@ -162,20 +161,30 @@ namespace FlickerApplication
 
         void ftdiQueueReader_DoWork(object sender, DoWorkEventArgs e)
         {
-            //BackgroundWorker worker = sender as BackgroundWorker;
-            
-
-            if (myFlicer.receivedData.Count > 0)
+            while (readerEnable)
             {
-                byte singleChar;
-
-                while (myFlicer.receivedData.Count > 0)
+                if (myFlicer.receivedData.Count > 0)
                 {
-                    singleChar = Convert.ToByte(myFlicer.receivedData.Dequeue());
-                    windowData.textBox1.Text += singleChar;
-                }
-            }
-            CommandManager.InvalidateRequerySuggested();
+                    byte[] dane = new byte[myFlicer.receivedData.Count];
+                    for (int i = 0; i < dane.Length; i++)
+                    {
+                        dane[i] = myFlicer.receivedData.Dequeue();
+                        flickerMeasurements.Enqueue(dane[i]);
+                    }
+                    
+                    //Konwersja queue do tablicy:
+                    //myFlicer.receivedData.ToArray<byte>()
+                    Dispatcher.Invoke((Action)(() =>
+                    {                        
+                        windowData.textBox1.Text += Encoding.ASCII.GetString(dane);
+                        windowData.textBox1.ScrollToEnd();  
+                    }
+                    ));
+                }                        
+                CommandManager.InvalidateRequerySuggested();
+                Thread.Sleep(10);
+            }   
+                  
         }
 
         
@@ -183,7 +192,12 @@ namespace FlickerApplication
         public void saveReceivedData()
         {
             enableControls(false, true, true, true);
-            
+            readerEnable = false;
+
+            flickerFile.Write("Troche tekstu 2");
+
+            flickerFile.Close();       
+
         }
 
 
@@ -214,9 +228,35 @@ namespace FlickerApplication
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
+        {            
             windowData.Close();
-            
+            try
+            {
+                logger.StopLogging();
+            }
+            catch (Exception e1)
+            {
+
+            }
         }
     }
 }
+
+
+//public void StartReadingQueueOnTimer()
+//{
+//    dataTimer.Tick += new EventHandler(dataTimer_Tick);
+//    dataTimer.Interval = new TimeSpan(10); //dest: 100 ms            
+//    dataTimer.Start();
+
+//}
+
+//void dataTimer_Tick(object sender, EventArgs e)
+//{
+
+//    if (myFlicer.receivedData.Count > 0)
+//    {                
+//        windowData.textBox1.Text += Convert.ToChar(myFlicer.receivedData.Dequeue());
+//        windowData.textBox1.ScrollToEnd();
+//    }
+//}

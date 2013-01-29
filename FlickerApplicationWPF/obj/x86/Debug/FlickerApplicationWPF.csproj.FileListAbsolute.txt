@@ -16,3 +16,5 @@ G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\bin\Debug\FTD2XX
 G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\FormSplash.baml
 G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\FormSplash.g.cs
 G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\bin\Debug\FlickerApplicationWPF.exe.config
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\WindowData.baml
+G:\FLICKER APPLICATION\FlickerApplication\FlickerApplicationWPF\obj\x86\Debug\WindowData.g.cs

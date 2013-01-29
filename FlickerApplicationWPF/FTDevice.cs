@@ -15,7 +15,7 @@ namespace FlickerApplication
         // Create new instance of the FTDI device class
         private static FTDI myFtdiDevice;
         private bool opened { get; set; }
-        public Queue receivedData = new Queue();
+        public Queue<byte> receivedData = new Queue<byte>();
 
         public FTDevice()
         {
@@ -97,7 +97,7 @@ namespace FlickerApplication
 
             // Set up device data parameters
             // Set Baud rate to 9600
-            ftStatus = myFtdiDevice.SetBaudRate(9600);
+            ftStatus = myFtdiDevice.SetBaudRate(19200);
             if (ftStatus != FTDI.FT_STATUS.FT_OK)
             {
                 // Wait for a key press
@@ -221,7 +221,13 @@ namespace FlickerApplication
                     // invoke your own event handler for data received...
                     //InvokeCharacterReceivedEvent(fParsedData);
                     
-                    receivedData.Enqueue(readData);
+                    //List<byte> daneList = new List<byte>();
+
+                    for( int i = 0; i< nrOfBytesAvailable; i++)
+                    {
+                        receivedData.Enqueue(readData[i]);
+                    }
+                    
                     Console.WriteLine("Number of bytes = ");
                     Console.WriteLine(nrOfBytesAvailable);
                     Console.WriteLine(receivedData.Count);

@@ -27,7 +27,12 @@ namespace FlickerApplication
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
-            mainWindow.saveReceivedData();
+            Dispatcher.Invoke((Action)(() =>
+            {
+                mainWindow.saveReceivedData();
+            }
+            )); 
+            
         }
     }
 }
