@@ -1,7 +1,7 @@
 ﻿<Window x:Class="FlickerApplication.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Flicker Fusion Manager" Height="350" Width="258" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" FontWeight="Normal">
+        Title="Flicker Fusion Manager" Height="350" Width="258" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" FontWeight="Normal" Closing="Window_Closing">
     <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <Button Content="Connect Flicker" Height="37" HorizontalAlignment="Center" Margin="0,33,0,0" Name="btConnect" VerticalAlignment="Top" Width="137" Click="buttonConnect" FontWeight="Bold" IsEnabled="True" />
         <Button Content="Read Data" Height="37" HorizontalAlignment="Center" Margin="0,76,0,0" Name="btRead" VerticalAlignment="Top" Width="137" IsEnabled="False" FontWeight="Bold" Click="btRead_Click" />

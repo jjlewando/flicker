@@ -13,6 +13,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Windows.Forms;
+using System.Threading;
+using System.ComponentModel;
 
 namespace FlickerApplication
 {
@@ -24,7 +26,8 @@ namespace FlickerApplication
         private static FTDevice myFlicer = new FTDevice();
         private static FormSplash formSplash = new FormSplash();
         public DispatcherTimer dispTimer = new DispatcherTimer();
-        
+        public DispatcherTimer dataTimer = new DispatcherTimer();
+        private static WindowData windowData = new WindowData();
 
         public MainWindow()
         {
@@ -35,6 +38,7 @@ namespace FlickerApplication
             dispTimer.Tick += new EventHandler(dispTimer_Tick);
             dispTimer.Interval = new TimeSpan(0, 0, 2);
             dispTimer.Start();
+            
             
         }
 
@@ -79,7 +83,6 @@ namespace FlickerApplication
                         textStatus.Text += Environment.NewLine + "Connected";
                         enableControls(false, true, true, true);
                         myFlicer.FtReceiverInit();
-
                     }
                     else
                     {
@@ -109,22 +112,30 @@ namespace FlickerApplication
                     enableControls(false, false, false, false);
                     Console.WriteLine("FolderOpened");
                     DateTime dataCzas = DateTime.Now;
-
-                    //string flickerFolder = folderDialog.SelectedPath;
                     string flickerFilePath = folderDialog.SelectedPath + "\\" + "Flicker_[" + dataCzas.Year.ToString() + "_" + dataCzas.Month.ToString() + "_" + dataCzas.Day.ToString() + "].txt";
 
                     System.IO.StreamWriter flickerFile = new System.IO.StreamWriter(flickerFilePath);
                     
                     // Send Command to device
+                    
+
+                    //lock application and wait for all data (?) <---------------
+                                        
+                    //flickerFile.Write(Environment.NewLine + "kolejny tekst");
+                    windowData.Show();
+                    windowData.textBox1.Text = "Hello";
+
+                    //dataTimer.Tick += new EventHandler(dataTimer_Tick);
+                    //dataTimer.Interval = new TimeSpan(0, 0, 5);
+                    //dataTimer.Start();
+                    
+                    StartReadingQueue();
+                                       
+
                     myFlicer.writeData("R");
                     textStatus.Text += Environment.NewLine + "R-Command Send";
                     textStatus.ScrollToEnd();
 
-                    //lock application and wait for all data (?) <---------------
-                    
-                    
-                    //flickerFile.Write(Environment.NewLine + "kolejny tekst");
-                    
                     flickerFile.Close(); 
                 }
                 else
@@ -134,6 +145,48 @@ namespace FlickerApplication
                 enableControls(false, true, true, true);
             }
         }
+
+        BackgroundWorker ftdiQueueReader = new BackgroundWorker();
+        
+
+        private void StartReadingQueue()
+        {
+            ftdiQueueReader.WorkerSupportsCancellation = true;
+            
+            ftdiQueueReader.DoWork += new DoWorkEventHandler(ftdiQueueReader_DoWork);
+            if (ftdiQueueReader.IsBusy != true)
+            {
+                ftdiQueueReader.RunWorkerAsync();
+            }
+        }
+
+        void ftdiQueueReader_DoWork(object sender, DoWorkEventArgs e)
+        {
+            //BackgroundWorker worker = sender as BackgroundWorker;
+            
+
+            if (myFlicer.receivedData.Count > 0)
+            {
+                byte singleChar;
+
+                while (myFlicer.receivedData.Count > 0)
+                {
+                    singleChar = Convert.ToByte(myFlicer.receivedData.Dequeue());
+                    windowData.textBox1.Text += singleChar;
+                }
+            }
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        
+
+        public void saveReceivedData()
+        {
+            enableControls(false, true, true, true);
+            
+        }
+
+
 
         private void btErase_Click(object sender, RoutedEventArgs e)
         {
@@ -149,19 +202,21 @@ namespace FlickerApplication
         {
             if (myFlicer.isOpened())
             {
-                List<byte> byteList = new List<byte>();
-
-                byteList.Add(0xA1);
-
                 DateTime time = DateTime.Now;
                 Console.WriteLine(time.ToString());
-                
-                
-                
-                myFlicer.writeData(time.ToString());
+
+                string textToDevice = "T" + time.ToString();
+
+                myFlicer.writeData(textToDevice);
                 textStatus.Text += Environment.NewLine + time.ToString();
                 textStatus.ScrollToEnd();
             }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            windowData.Close();
+            
         }
     }
 }

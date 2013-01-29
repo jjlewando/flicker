@@ -220,6 +220,7 @@ namespace FlickerApplication
 
                     // invoke your own event handler for data received...
                     //InvokeCharacterReceivedEvent(fParsedData);
+                    
                     receivedData.Enqueue(readData);
                     Console.WriteLine("Number of bytes = ");
                     Console.WriteLine(nrOfBytesAvailable);
