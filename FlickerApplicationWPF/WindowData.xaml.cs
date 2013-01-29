@@ -18,7 +18,7 @@ namespace FlickerApplication
     /// </summary>
     public partial class WindowData : Window
     {
-        MainWindow mainWindow = new MainWindow();
+        public MainWindow MainWindow { private get; set; }
 
         public WindowData()
         {
@@ -29,10 +29,10 @@ namespace FlickerApplication
         {
             Dispatcher.Invoke((Action)(() =>
             {
-                mainWindow.saveReceivedData();
+                MainWindow.saveReceivedData();
             }
-            )); 
-            
+            ));
+
         }
     }
 }

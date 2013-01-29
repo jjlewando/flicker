@@ -1,4 +1,5 @@
-/FlickerApplication.suo
-/FlickerApplicationWPF/bin
-bin
+bin/
+obj/
+*.suo
 /FTDI Examples
+

@@ -23,25 +23,26 @@ namespace FlickerApplication
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static FTDevice myFlicer = new FTDevice();
-        private static FormSplash formSplash = new FormSplash();
+        private FTDevice myFlicer = new FTDevice();
+        private FormSplash formSplash = new FormSplash();
         public DispatcherTimer dispTimer = new DispatcherTimer();
         //public DispatcherTimer dataTimer = new DispatcherTimer();
-        private static WindowData windowData = new WindowData();
+        private WindowData windowData;
         private Queue<byte> flickerMeasurements = new Queue<byte>();
         public bool readerEnable = new bool();
-        public static System.IO.StreamWriter flickerFile;
+        public System.IO.StreamWriter flickerFile;
         private FileLogger logger;
- 
+
         public MainWindow()
         {
             InitializeComponent();
             enableControls(true, false, false, false);
             formSplash.Show();
-            formSplash.Topmost = true; 
+            formSplash.Topmost = true;
             dispTimer.Tick += new EventHandler(dispTimer_Tick);
             dispTimer.Interval = new TimeSpan(0, 0, 1);
-            dispTimer.Start();            
+            dispTimer.Start();
+            windowData = new WindowData() { MainWindow = this, };
         }
 
         void dispTimer_Tick(object sender, EventArgs e)
@@ -51,7 +52,7 @@ namespace FlickerApplication
             //Console.WriteLine("Timer event");            
             CommandManager.InvalidateRequerySuggested();
         }
-        
+
         private void enableControls(bool keyConnect, bool keyReed, bool keyErase, bool keySynchro)
         {
             //btConnect.IsEnabled = keyConnect;
@@ -66,7 +67,7 @@ namespace FlickerApplication
         private void buttonConnect(object sender, RoutedEventArgs e)
         {
             logger = new FileLogger();
-            logger.AddEntry("Aplication started");            
+            logger.AddEntry("Aplication started");
 
             if (myFlicer.isOpened())
             {
@@ -98,7 +99,7 @@ namespace FlickerApplication
                 {
                     textStatus.Text += Environment.NewLine + "No devices";
                 }
-                
+
             }
             textStatus.ScrollToEnd();
         }
@@ -122,17 +123,17 @@ namespace FlickerApplication
                     flickerFile = new System.IO.StreamWriter(flickerFilePath);
 
                     enableControls(false, false, false, false);
-                    
+
                     windowData.ShowDialog();
                     windowData.textBox1.Text = "";
                     myFlicer.receivedData.Clear();
                     StartReadingQueue();
-                    
+
                     myFlicer.writeData("R");
                     textStatus.Text += Environment.NewLine + "R-Command Send";
                     textStatus.ScrollToEnd();
 
-                    
+
                 }
                 else
                 {
@@ -144,7 +145,7 @@ namespace FlickerApplication
 
         BackgroundWorker ftdiQueueReader = new BackgroundWorker();
 
-        
+
 
 
         private void StartReadingQueue()
@@ -171,23 +172,23 @@ namespace FlickerApplication
                         dane[i] = myFlicer.receivedData.Dequeue();
                         flickerMeasurements.Enqueue(dane[i]);
                     }
-                    
+
                     //Konwersja queue do tablicy:
                     //myFlicer.receivedData.ToArray<byte>()
                     Dispatcher.Invoke((Action)(() =>
-                    {                        
+                    {
                         windowData.textBox1.Text += Encoding.ASCII.GetString(dane);
-                        windowData.textBox1.ScrollToEnd();  
+                        windowData.textBox1.ScrollToEnd();
                     }
                     ));
-                }                        
+                }
                 CommandManager.InvalidateRequerySuggested();
                 Thread.Sleep(10);
-            }   
-                  
+            }
+
         }
 
-        
+
 
         public void saveReceivedData()
         {
@@ -196,7 +197,7 @@ namespace FlickerApplication
 
             flickerFile.Write("Troche tekstu 2");
 
-            flickerFile.Close();       
+            flickerFile.Close();
 
         }
 
@@ -228,7 +229,7 @@ namespace FlickerApplication
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {            
+        {
             windowData.Close();
             try
             {
